@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -19,11 +23,28 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  TalonFX lDriveMotor1;
+  TalonFX lDriveMotor2;
+  TalonFX rDriveMotor1;
+  TalonFX rDriveMotor2;
+
+  private final XboxController driveController;
+  private final XboxController operatorController;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
+    lDriveMotor1 = new TalonFX(1);
+    lDriveMotor2 = new TalonFX(2);
+    rDriveMotor1 = new TalonFX(3);
+    rDriveMotor2 = new TalonFX(4);
+    
+    driveController = new XboxController(0);
+    operatorController = new XboxController(1);
+
+
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
@@ -76,7 +97,14 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    lDriveMotor1.set(driveController.getLeftY() + driveController.getLeftX());
+    lDriveMotor2.set(driveController.getLeftY() + driveController.getLeftX());
+    rDriveMotor1.set(driveController.getLeftY() - driveController.getLeftX());
+    rDriveMotor2.set(driveController.getLeftY() - driveController.getLeftX());
+
+
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
