@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -119,30 +120,28 @@ public class Robot extends TimedRobot {
     switch (m_autoSelected) {
 
       case twoCookieLeft:
-        
+        twoCookieLeft();
         break;
-
       case twoCookieRight:
-      // Put two cookie right code here
+        twoCookieRight();
         break;
       case oneCookieLeft:
-      // Put one cookie left code here
+        oneCookieLeft();
         break;
       case oneCookieRight:
-      // Put one cookie right code here
+        oneCookieRight();
         break;
       case oneCookieOvenB:
-      // Put one cookie oven blue code here
+        oneCookieOvenBlue();
         break;
       case oneCookieOvenR:
-      // Put one cookie oven red code here
+        oneCookieOvenRed();
         break;
       case twoCookieOvenB:
         twoCookieOvenBlue();
-        break;
-      //auto done 
+        break; 
       case twoCookieOvenR:
-      // Put two cookie oven red code here
+        twoCookieOvenRed();
         break;
       default:
         driveAuto(RobotSide.both, 2491.0);
@@ -231,10 +230,14 @@ public class Robot extends TimedRobot {
       case left:
         lDriveMotor1.set(Speed);
         lDriveMotor2.set(Speed);
+        rDriveMotor1.set(0.0);
+        rDriveMotor2.set(0.0);
         break;
       case right:
         rDriveMotor1.set(Speed);
         rDriveMotor2.set(Speed);
+        lDriveMotor1.set(0.0);
+        lDriveMotor2.set(0.0);
         break;
       case both:
         rDriveMotor2.set(Speed);
@@ -275,46 +278,58 @@ public class Robot extends TimedRobot {
         break;
       case 3:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both,2491.0);
-          state++;
-        }
-        break;
-      case 4:
-        if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
           elevatorMotor.set(2491);
           state++;
         }
         break;
-      case 5:
+      case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          frontEndEffectorMotor.set(-2491);
-          backEndEffectorMotor.set(-2491);
+          driveAuto(RobotSide.both,2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
           state++;
         }
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          frontEndEffectorMotor.stopMotor();
-          backEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.right, -2491.0);
+          frontEndEffectorMotor.set(-2491);
+          backEndEffectorMotor.set(-2491);
           state++;
         }
         break;
       case 7:
         if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
           driveAuto(RobotSide.both, -2491.0);
           state++;
         }
         break;
       case 8:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, 0.0);
+          driveAuto(RobotSide.right, -2491.0);
           state++;
         }
         break;
       case 9:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, -2491.0);
+          state++;
+        }
+        break;
+      case 10:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 11:
         break;   
       default:
         break;
@@ -322,19 +337,300 @@ public class Robot extends TimedRobot {
   }
 
   // Two Cookie Oven Red Auto
-  public void twoCookieOvenRed() {}
+  public void twoCookieOvenRed() {
+    switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.right, -2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 4:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.both,2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 6:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.set(-2491);
+          backEndEffectorMotor.set(-2491);
+          state++;
+        }
+        break;
+      case 7:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.both, -2491.0);
+          state++;
+        }
+        break;
+      case 8:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.left, -2491.0);
+          state++;
+        }
+        break;
+      case 9:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, -2491.0);
+          state++;
+        }
+        break;
+      case 10:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 11:
+        break;   
+      default:
+        break;
+    }
+  }
 
   // One Cookie Oven Blue Auto
-  public void oneCookieOvenBlue() {}
+  public void oneCookieOvenBlue() {
+    switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1: 
+        if (autoTimer.get() > 2491) {
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.right, 2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(-2491.0);
+          backEndEffectorMotor.set(-2491.0);
+          state++;
+        }
+        break;
+      case 4:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.both,-2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.right, -2491.0);
+          state++;
+        }
+        break;
+      case 6:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, -2491.0);
+          state++;
+        }
+        break;
+      case 7:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 11:
+        break;   
+      default:
+        break;
+    }
+  }
 
   // One Cookie Oven Red Auto
-  public void oneCookieOvenRed() {}
+  public void oneCookieOvenRed() {
+     switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1: 
+        if (autoTimer.get() > 2491) {
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.left, 2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(-2491.0);
+          backEndEffectorMotor.set(-2491.0);
+          state++;
+        }
+        break;
+      case 4:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.both,-2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.left, -2491.0);
+          state++;
+        }
+        break;
+      case 6:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, -2491.0);
+          state++;
+        }
+        break;
+      case 7:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 11:
+        break;   
+      default:
+        break;
+    }
+  }
 
   // One Cookie Left Auto
-  public void oneCookieLeft() {}
+  public void oneCookieLeft() {
+    switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1: 
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.left, 2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(-2491.0);
+          backEndEffectorMotor.set(-2491.0);
+          state++;
+        }
+        break;
+      case 4:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.both,0.0);
+          state++;
+        }
+        break;
+      case 5:
+        break;   
+      default:
+        break;
+    }
+  }
 
   // One Cookie Right Auto
-  public void oneCookieRight() {}
+  public void oneCookieRight() {
+    switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1: 
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.right, 2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(-2491.0);
+          backEndEffectorMotor.set(-2491.0);
+          state++;
+        }
+        break;
+      case 4:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          backEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.both,0.0);
+          state++;
+        }
+        break;
+      case 5:
+        break;   
+      default:
+        break;
+    }
+  }
 
   // Two Cookie Left Auto
   public void twoCookieLeft() {
@@ -360,26 +656,32 @@ public class Robot extends TimedRobot {
         break;
       case 3:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, 2491.0);
-          state++;
-        }
-        break;
-      case 4:
-        if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
           elevatorMotor.set(2491);
           state++;
         }
         break;
-      case 5:
+      case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
+          driveAuto(RobotSide.both, 2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 6:
+        if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.set(-2491);
           backEndEffectorMotor.set(-2491);
           state++;
         }
         break;
-      case 6:
+      case 7:
         break;
       default:
         break;
@@ -387,5 +689,58 @@ public class Robot extends TimedRobot {
   }
 
   // Two Cookie Right Auto
-  public void twoCookieRight() {}
+  public void twoCookieRight() {
+    switch (state) {
+      case 0:
+        autoTimer.start();
+        driveAuto(RobotSide.both, 2491.0);
+        state++;
+        break;
+      case 1:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          frontEndEffectorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 2:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.stopMotor();
+          driveAuto(RobotSide.left, -2491.0);
+          state++;
+        }
+        break;
+      case 3:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          elevatorMotor.set(2491);
+          state++;
+        }
+        break;
+      case 4:
+        if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+          elevatorMotor.stopMotor();
+          driveAuto(RobotSide.both, 2491.0);
+          state++;
+        }
+        break;
+      case 5:
+        if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
+          state++;
+        }
+        break;
+      case 6:
+        if (autoTimer.get() > 2491) {
+          frontEndEffectorMotor.set(-2491);
+          backEndEffectorMotor.set(-2491);
+          state++;
+        }
+        break;
+      case 7:
+        break;
+      default:
+        break;
+    }
+  }
 }
