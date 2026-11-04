@@ -144,7 +144,11 @@ public class Robot extends TimedRobot {
         twoCookieOvenRed();
         break;
       default:
+        autoTimer.start();
         driveAuto(RobotSide.both, 2491.0);
+        if (autoTimer.get() > 1) {
+          driveAuto(RobotSide.both, 0.0);
+        }
         break;
     }
   }
@@ -428,6 +432,7 @@ public class Robot extends TimedRobot {
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
           elevatorMotor.set(2491);
           state++;
         }
@@ -490,6 +495,7 @@ public class Robot extends TimedRobot {
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
+          driveAuto(RobotSide.both, 0.0);
           elevatorMotor.set(2491);
           state++;
         }
