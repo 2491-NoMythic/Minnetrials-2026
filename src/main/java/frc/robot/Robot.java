@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import java.security.spec.ECFieldFp;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -47,6 +50,13 @@ public class Robot extends TimedRobot {
   private Timer autoTimer;
   private double mulTplIR;
 
+  //constants
+  private double AUTO_DRIVE_SPEED;
+  private double END_EFFECTOR_SPEED;
+  private double ELEVATOR_SPEED;
+  private double ELEVATOR_UP;
+  private double LOW_OVEN_HEIGHT;
+
   public enum RobotSide{
     left,
     right,
@@ -71,6 +81,12 @@ public class Robot extends TimedRobot {
 
     state = 0;
     autoTimer = new Timer();
+
+    AUTO_DRIVE_SPEED = 2491;
+    END_EFFECTOR_SPEED = 2491;
+    ELEVATOR_SPEED = 2491;
+    ELEVATOR_UP = 2491;
+    LOW_OVEN_HEIGHT = 2491;
 
     m_chooser.addOption("One Cookie Oven 🟦", oneCookieOvenB);
     m_chooser.addOption("One Cookie Oven 🟥", oneCookieOvenR);
@@ -113,6 +129,8 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+
+    autoTimer.reset();
   }
 
   /** This function is called periodically during autonomous. */
@@ -146,7 +164,7 @@ public class Robot extends TimedRobot {
         break;
       default:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         if (autoTimer.get() > 1) {
           driveAuto(RobotSide.both, 0.0);
         }
@@ -177,14 +195,14 @@ public class Robot extends TimedRobot {
 
     // Front end effector control using the left bumper button on the operator controller
     if (driveController.getLeftBumperButton()) {
-      frontEndEffectorMotor.set(2491);
+      frontEndEffectorMotor.set(END_EFFECTOR_SPEED);
     } else {
       frontEndEffectorMotor.stopMotor();
     }
 
     // Back end effector control using the right bumper button on the operator controller
     if (driveController.getRightBumperButton()) {
-      backEndEffectorMotor.set(2491);
+      backEndEffectorMotor.set(END_EFFECTOR_SPEED);
     } else {
       backEndEffectorMotor.stopMotor();
     }
@@ -192,11 +210,11 @@ public class Robot extends TimedRobot {
     // Elevator control
     if (operatorController.getRightTriggerAxis() > 0.5 && elevatorMotor.getPosition().getValueAsDouble() < 2491) {
       //go up if the elevator is not at the top limit
-      elevatorMotor.set(2491);
+      elevatorMotor.set(ELEVATOR_SPEED);
 
     } else if (operatorController.getLeftTriggerAxis() > 0.5 && elevatorMotor.getPosition().getValueAsDouble() > 0) {
       //go down if the elevator is not at the bottom limit
-      elevatorMotor.set(-2491);
+      elevatorMotor.set(-ELEVATOR_SPEED);
 
     } else if (operatorController.getRightStickButton()) {
       // the elevator goes allll the way down ):
@@ -204,11 +222,11 @@ public class Robot extends TimedRobot {
     
     } else if (operatorController.getLeftStickButton()) {
       // the elevator goes aaaal the way up (:
-      elevatorMotor.setPosition(2491);
+      elevatorMotor.setPosition(ELEVATOR_UP);
 
     } else if (operatorController.getLeftBumperButton()) {
       // the elvatorrr goes aalll the way to the low oven hight set point ¯\_(ツ)_/¯
-      elevatorMotor.setPosition(24.91);
+      elevatorMotor.setPosition(LOW_OVEN_HEIGHT);
 
     } else {
       elevatorMotor.stopMotor();
@@ -283,34 +301,34 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(2491);
+          frontEndEffectorMotor.set(END_EFFECTOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.left, -2491.0);
+          driveAuto(RobotSide.left, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.both,2491.0);
+          driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -322,8 +340,8 @@ public class Robot extends TimedRobot {
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          frontEndEffectorMotor.set(-2491);
-          backEndEffectorMotor.set(-2491);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -331,19 +349,19 @@ public class Robot extends TimedRobot {
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
           backEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 8:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.right, -2491.0);
+          driveAuto(RobotSide.right, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 9:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -365,34 +383,34 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(2491);
+          frontEndEffectorMotor.set(END_EFFECTOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.right, -2491.0);
+          driveAuto(RobotSide.right, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.both,2491.0);
+          driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -404,8 +422,8 @@ public class Robot extends TimedRobot {
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          frontEndEffectorMotor.set(-2491);
-          backEndEffectorMotor.set(-2491);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -413,19 +431,19 @@ public class Robot extends TimedRobot {
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
           backEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 8:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.left, -2491.0);
+          driveAuto(RobotSide.left, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 9:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -447,28 +465,28 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.right, 2491.0);
+          driveAuto(RobotSide.right, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(-2491.0);
-          backEndEffectorMotor.set(-2491.0);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -476,19 +494,19 @@ public class Robot extends TimedRobot {
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
           backEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.both,-2491.0);
+          driveAuto(RobotSide.both,-AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 5:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.right, -2491.0);
+          driveAuto(RobotSide.right, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -510,28 +528,28 @@ public class Robot extends TimedRobot {
      switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.left, 2491.0);
+          driveAuto(RobotSide.left, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(-2491.0);
-          backEndEffectorMotor.set(-2491.0);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -539,19 +557,19 @@ public class Robot extends TimedRobot {
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
           backEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.both,-2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 5:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.left, -2491.0);
+          driveAuto(RobotSide.left, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, -2491.0);
+          driveAuto(RobotSide.both, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -573,28 +591,28 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
-          driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.left, 2491.0);
+          driveAuto(RobotSide.left, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(-2491.0);
-          backEndEffectorMotor.set(-2491.0);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -618,28 +636,28 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1: 
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.right, 2491.0);
+          driveAuto(RobotSide.right, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(-2491.0);
-          backEndEffectorMotor.set(-2491.0);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -663,34 +681,34 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(2491);
+          frontEndEffectorMotor.set(END_EFFECTOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.right, -2491.0);
+          driveAuto(RobotSide.right, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.both, 2491.0);
+          driveAuto(RobotSide.both, ELEVATOR_SPEED);
           state++;
         }
         break;
@@ -702,8 +720,8 @@ public class Robot extends TimedRobot {
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          frontEndEffectorMotor.set(-2491);
-          backEndEffectorMotor.set(-2491);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
@@ -719,34 +737,34 @@ public class Robot extends TimedRobot {
     switch (state) {
       case 0:
         autoTimer.start();
-        driveAuto(RobotSide.both, 2491.0);
+        driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
         state++;
         break;
       case 1:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          frontEndEffectorMotor.set(2491);
+          frontEndEffectorMotor.set(END_EFFECTOR_SPEED);
           state++;
         }
         break;
       case 2:
         if (autoTimer.get() > 2491) {
           frontEndEffectorMotor.stopMotor();
-          driveAuto(RobotSide.left, -2491.0);
+          driveAuto(RobotSide.left, -AUTO_DRIVE_SPEED);
           state++;
         }
         break;
       case 3:
         if (autoTimer.get() > 2491) {
           driveAuto(RobotSide.both, 0.0);
-          elevatorMotor.set(2491);
+          elevatorMotor.set(ELEVATOR_SPEED);
           state++;
         }
         break;
       case 4:
         if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
           elevatorMotor.stopMotor();
-          driveAuto(RobotSide.both, 2491.0);
+          driveAuto(RobotSide.both, AUTO_DRIVE_SPEED);
           state++;
         }
         break;
@@ -758,8 +776,8 @@ public class Robot extends TimedRobot {
         break;
       case 6:
         if (autoTimer.get() > 2491) {
-          frontEndEffectorMotor.set(-2491);
-          backEndEffectorMotor.set(-2491);
+          frontEndEffectorMotor.set(-END_EFFECTOR_SPEED);
+          backEndEffectorMotor.set(-END_EFFECTOR_SPEED);
           state++;
         }
         break;
