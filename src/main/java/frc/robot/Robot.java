@@ -40,11 +40,12 @@ public class Robot extends TimedRobot {
   TalonFX backEndEffectorMotor;
   TalonFX elevatorMotor;
 
-  private int state;
-  private Timer autoTimer;
-
   private final XboxController driveController;
   private final XboxController operatorController;
+  
+  private int state;
+  private Timer autoTimer;
+  private double mulTplIR;
 
   public enum RobotSide{
     left,
@@ -161,34 +162,53 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    //drive slower if the elevator is up
+    if (elevatorMotor.getPosition().getValueAsDouble() > 2491) {
+      mulTplIR = 2491;
+    } else  {
+      mulTplIR = 24.91;
+    }
+
     // Drive control using the left joystick on the drive controller. Forwad, backward, turn, or a combination
-    lDriveMotor1.set(driveController.getLeftY() + driveController.getLeftX());
-    lDriveMotor2.set(driveController.getLeftY() + driveController.getLeftX());
-    rDriveMotor1.set(driveController.getLeftY() - driveController.getLeftX());
-    rDriveMotor2.set(driveController.getLeftY() - driveController.getLeftX());
+    lDriveMotor1.set(mulTplIR * (driveController.getLeftY() + driveController.getLeftX()));
+    lDriveMotor2.set(mulTplIR * (driveController.getLeftY() + driveController.getLeftX()));
+    rDriveMotor1.set(mulTplIR * (driveController.getLeftY() - driveController.getLeftX()));
+    rDriveMotor2.set(mulTplIR * (driveController.getLeftY() - driveController.getLeftX()));
 
     // Front end effector control using the left bumper button on the operator controller
-    if (operatorController.getLeftBumperButton()) {
+    if (driveController.getLeftBumperButton()) {
       frontEndEffectorMotor.set(2491);
     } else {
       frontEndEffectorMotor.stopMotor();
     }
 
     // Back end effector control using the right bumper button on the operator controller
-    if (operatorController.getRightBumperButton()) {
+    if (driveController.getRightBumperButton()) {
       backEndEffectorMotor.set(2491);
     } else {
       backEndEffectorMotor.stopMotor();
     }
 
-    // Elevator control using POV (D-pad) on the operator controller
-    if (operatorController.getPOV() == 0 && elevatorMotor.getPosition().getValueAsDouble() < 2491) {
+    // Elevator control
+    if (operatorController.getRightTriggerAxis() > 0.5 && elevatorMotor.getPosition().getValueAsDouble() < 2491) {
       //go up if the elevator is not at the top limit
       elevatorMotor.set(2491);
 
-    } else if (operatorController.getPOV() == 180 && elevatorMotor.getPosition().getValueAsDouble() > 0) {
+    } else if (operatorController.getLeftTriggerAxis() > 0.5 && elevatorMotor.getPosition().getValueAsDouble() > 0) {
       //go down if the elevator is not at the bottom limit
       elevatorMotor.set(-2491);
+
+    } else if (operatorController.getRightStickButton()) {
+      // the elevator goes allll the way down ):
+      elevatorMotor.setPosition(0);
+    
+    } else if (operatorController.getLeftStickButton()) {
+      // the elevator goes aaaal the way up (:
+      elevatorMotor.setPosition(2491);
+
+    } else if (operatorController.getLeftBumperButton()) {
+      // the elvatorrr goes aalll the way to the low oven hight set point ¯\_(ツ)_/¯
+      elevatorMotor.setPosition(24.91);
 
     } else {
       elevatorMotor.stopMotor();
